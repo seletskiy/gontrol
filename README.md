@@ -23,7 +23,7 @@ All you need is, step by step:
    an example);
 2. In the HTML file of you presentation write something like this:
    ```js
-   var controlSocket = new WebSocket("ws://YOUR_IP_ADDRESS_HERE:8080/s/")
+   var controlSocket = new WebSocket("ws://YOUR_IP_ADDRESS_HERE:1444/s/")
    controlSocket.onmessage = function (event) {
        eval('var msg = ' + event.data); // or use JSON parser
 
@@ -38,7 +38,7 @@ All you need is, step by step:
    }
    ```
 3. Open your presentation in Web browser on the controlled computer;
-4. Open `http://YOUR_IP_ADDRESS:8080/` in the browser on your phone;
+4. Open `http://YOUR_IP_ADDRESS:1444/` in the browser on your phone;
 5. Control your presentation progress by clicking on buttons on your phone!
 
 Note, that port can be changed to more pleasurable one, and `web` dir from the
