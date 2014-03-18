@@ -23,7 +23,7 @@ type actionHandler struct {
 func (h actionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := filepath.Join(h.root, r.URL.Path)
 	action := strings.TrimPrefix(r.URL.Path, "/a/")
-	if action != path {
+	if action != r.URL.Path {
 		log.Println("[action]", action)
 
 		path = h.root
