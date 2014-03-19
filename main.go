@@ -20,7 +20,7 @@ func main() {
 	listen := *flag.String("listen", ":1444", "address to listen to")
 	flag.Parse()
 
-	http.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		path := filepath.Join(webroot, r.URL.Path)
 		action := strings.TrimPrefix(r.URL.Path, "/a/")
 		if action != r.URL.Path {
@@ -55,7 +55,7 @@ func main() {
 		}
 	})
 
-	http.Handle("/s/", websocket.Handler(func (ws *websocket.Conn) {
+	http.Handle("/s/", websocket.Handler(func(ws *websocket.Conn) {
 		i := make(chan []byte)
 
 		addClient(i)
