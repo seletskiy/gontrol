@@ -17,7 +17,7 @@ type executor func(string, *http.Request)
 func main() {
 	webroot := *flag.String("webroot", filepath.Join(".", "web"),
 		"directory to serve")
-	listen := *flag.String("listen", ":1444", "address to listen to")
+	listen := flag.String("listen", ":1444", "address to listen to")
 	flag.Parse()
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +74,7 @@ func main() {
 
 	runNotifier()
 
-	log.Println("[server] starting listener at", listen)
+	log.Println("[server] starting listener at", *listen)
 	log.Println("[server] serving", webroot)
-	log.Fatal(http.ListenAndServe(listen, nil))
+	log.Fatal(http.ListenAndServe(*listen, nil))
 }

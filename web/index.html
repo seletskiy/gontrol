@@ -1,9 +1,18 @@
 <html>
 <head>
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0" />
 <style type="text/css" media="screen">
 body {
     margin: 0;
     padding: 0;
+}
+
+.menu {
+    #display: none;
+}
+
+h1 {
+    border-bottom: 1px solid black;
 }
 
 a {
@@ -15,13 +24,220 @@ a {
     display: block;
     margin: 0;
     padding-bottom: 0.25em;
-    width: 50%;
-    font-size: 10em;
+    border-right: 1px solid gray;
+    border-bottom: 1px solid gray;
+    margin: 0 2px 2px 0;
+}
+
+#keyboard a {
+    font-size: 1.1em;
+    width: 5.4%;
+    margin: 0.05em;
+    padding: 0.14em;
+}
+
+#keyboard-row-2 {
+    margin-left: 1em;
+}
+
+#keyboard-row-3 {
+    margin-left: 2em;
+}
+
+#keyboard-row-4 {
+    margin-left: 3em;
+}
+
+#keyboard .shifted {
+    display: none;
+}
+
+#keyboard.shift .normal {
+    display: none;
+}
+
+#keyboard.shift .shifted {
+    display: inline;
+}
+
+#keyboard .row {
+    height: 2em;
+    clear: both;
+}
+
+#keys-control a {
+    width: 2em;
+}
+
+#keys-control .arrow {
+    width: 1.5em;
+}
+
+#keys-shift {
+    display: none;
+}
+
+a.big {
+    width: 49%;
+    font-size: 3em;
 }
 </style>
 </head>
 <body>
-<a href="/a/notify?move=prev">&larr;</a>
-<a href="/a/notify?move=next">&rarr;</a>
+<h1 id="clicker-opener">Clicker</h1>
+<div class="menu" id="clicker">
+    <a class="big" href="/a/notify?move=prev">&uarr;</a>
+    <a class="big" href="/a/notify?move=next">&darr;</a>
+    <a class="big" href="/a/notify?move=pgdown">PgDn</a>
+    <a class="big" href="/a/notify?move=pgup">PgUp</a>
+    <a class="big" href="/a/notify?move=left">&larr;</a>
+    <a class="big" href="/a/notify?move=right">&rarr;</a>
+    <a class="big" href="/a/notify?move=home">Home</a>
+    <a class="big" href="/a/notify?move=end">End</a>
+</div>
+<h1 id="keyboard-opener">Keyboard</h1>
+<div class="menu" id="keyboard">
+<div id="keys">
+<div id="keyboard-row-1" class="row">`~1!2@3#4$5%6^7&amp;8*9(0)-_=+</div>
+<div id="keyboard-row-2" class="row">qQwWeErRtTyYuUiIoOpP[{]}\|</div>
+<div id="keyboard-row-3" class="row">aAsSdDfFgGhHjJkKlL;:'"</div>
+<div id="keyboard-row-4" class="row">zZxXcCvVbBnNmM,&lt;.&gt;/?</div>
+</div>
+
+<div class="row" id="keys-control">
+    <a id="key-shift">shift</a>
+    <a id="key-ctrl">ctrl</a>
+    <a id="key-win">win</a>
+    <a data-key="space" class="key space" href="/a/type?key=space">&nbsp;</a>
+    <a data-key="Left" class="key arrow">&larr;</a>
+    <a data-key="Up" class="key arrow">&uarr;</a>
+    <a data-key="Down" class="key arrow">&darr;</a>
+    <a data-key="Right" class="key arrow">&rarr;</a>
+    <a data-key="Return" class="key">ret</a>
+    <a data-key="BackSpace" class="key">bs</a>
+</div>
+</div>
+<!--<a href="/a/scan">SCAN</a>-->
+<script type="text/javascript" charset="utf-8">
+var $ = function (s) {
+    if (s[0] == '.') {
+        return document.getElementsByClassName(s.substr(1))
+    } else {
+        return document.getElementById(s.substr(1))
+    }
+};
+
+var makeMenu = function (opener, contents) {
+    opener.addEventListener('click', function() {
+        if (contents.style.display == 'block') {
+            contents.style.display = 'none';
+        } else {
+            contents.style.display = 'block';
+        }
+    }, false);
+}
+
+makeMenu($('#clicker-opener'), $('#clicker'))
+makeMenu($('#keyboard-opener'), $('#keyboard'))
+
+var specials = {
+    '.': 'period',
+    ',': 'comma',
+    ';': 'colon',
+    '\\': 'backslash',
+    '/': 'slash',
+    '=': 'equal',
+    '\'': 'apostrophe',
+    '"': 'quotedbl',
+    '"': 'quotedbl',
+    '[': 'bracketleft',
+    ']': 'bracketright',
+    '`': 'grave',
+    '-': 'minus',
+}
+
+var makeKbd = function (obj) {
+    var keys = obj.innerText;
+
+    obj.innerText = '';
+
+    var a;
+    var keynum = 0;
+    for (k in keys) {
+        var char = keys[k].trim();
+        if (keynum == 0) {
+            a = document.createElement('a');
+            a.className = 'key'
+            a.innerHTML += '<span class="normal">' + char + '</span>';
+            if (char in specials) {
+                char = specials[char]
+            }
+
+            a.setAttribute('data-key', char);
+            keynum += 1;
+        } else {
+            keynum = 0;
+            a.innerHTML += '<span class="shifted">' + char + '</span>';
+            obj.appendChild(a);
+        }
+    }
+}
+
+var enableAjaxKbd = function (obj) {
+    var keys = $('.key');
+    for (i in keys) {
+        el = keys[i];
+        if (el.nodeName && el.nodeName.toLowerCase() == 'a') {
+            var a = el;
+            a.addEventListener('click', function (a) {return function (e) {
+                var req = new XMLHttpRequest();
+                req.open('GET', a.href, true)
+                req.send()
+                e.preventDefault();
+                keyModifier = '';
+                updateKbdModifier();
+            }}(a), false);
+        }
+    }
+}
+
+makeKbd($('#keyboard-row-1'));
+makeKbd($('#keyboard-row-2'));
+makeKbd($('#keyboard-row-3'));
+makeKbd($('#keyboard-row-4'));
+
+enableAjaxKbd();
+
+var keyModifier = '';
+var makeModKey = function (obj, name) {
+    obj.addEventListener('click', function () {
+        if (keyModifier == name) {
+            keyModifier = '';
+        } else {
+            keyModifier = name;
+        }
+
+        updateKbdModifier();
+    });
+}
+
+makeModKey($('#key-shift'), 'shift')
+makeModKey($('#key-ctrl'), 'ctrl')
+makeModKey($('#key-win'), 'super')
+
+var updateKbdModifier = function () {
+    $('#keyboard').className = keyModifier;
+
+    var keys = $('.key');
+    for (i in keys) {
+        el = keys[i];
+        if (el.nodeName && el.nodeName.toLowerCase() == 'a') {
+            el.href = '/a/type?key=' + encodeURIComponent(el.getAttribute('data-key')) + '&mod=' + keyModifier;
+        }
+    }
+}
+
+updateKbdModifier();
+</script>
 </body>
 </html>
