@@ -8,11 +8,13 @@ body {
 }
 
 .menu {
-    #display: none;
+    clear: both;
 }
 
 h1 {
     border-bottom: 1px solid black;
+    display: block;
+    clear: both;
 }
 
 a {
@@ -45,7 +47,7 @@ a {
 }
 
 #keyboard-row-4 {
-    margin-left: 3em;
+    margin-left: 0em;
 }
 
 #keyboard .shifted {
@@ -77,13 +79,83 @@ a {
     display: none;
 }
 
+a#key-ret {
+    width: 11%;
+}
+
+a#key-shift {
+    width: 11%;
+}
+
 a.big {
     width: 49%;
     font-size: 3em;
 }
+
+a#key-space {
+    width: 8em;
+}
+
+.pressed {
+    background: red;
+}
+
+#keys-arrow a {
+    float: right;
+    display: block;
+    font-size: 2em;
+    width: 1.5em;
+}
+
+#keys-arrow #key-arrow-up {
+    margin-right: 2.0em;
+}
+
+#keys-arrow #key-arrow-right {
+    float: right;
+    clear: right;
+}
+
+#keyboard-line {
+    overflow: hidden;
+    text-align: right;
+    margin-bottom: 0.5em;
+    padding-right: 1em;
+    white-space: nowrap;
+}
 </style>
 </head>
 <body>
+<h1 id="keyboard-opener">Keyboard</h1>
+<div class="menu" id="keyboard">
+<div id="keyboard-line">&nbsp;</div>
+<div id="keys">
+<div id="keyboard-row-1" class="row">`~1!2@3#4$5%6^7&amp;8*9(0)-_=+</div>
+<div id="keyboard-row-2" class="row">qQwWeErRtTyYuUiIoOpP[{]}\|</div>
+<div id="keyboard-row-3" class="row">aAsSdDfFgGhHjJkKlL;:'"</div>
+<div id="keyboard-row-4" class="row">zZxXcCvVbBnNmM,&lt;.&gt;/?</div>
+</div>
+
+<div class="row" id="keys-control">
+    <a id="key-shift">⇑</a>
+    <a id="key-ctrl">ctrl</a>
+    <a id="key-win">win</a>
+    <a data-key="space" id="key-space" class="key space" href="/a/type?key=space">&nbsp;</a>
+    <a data-key="Return" id="key-ret" class="key">↲</a>
+    <a data-key="BackSpace" class="key">⇐</a>
+    <a data-key="Escape" class="key">Esc</a>
+</div>
+<div class="row" id="keys-arrow">
+    <a id="key-arrow-up" data-key="Up" class="key arrow">&uarr;</a>
+    <a id="key-arrow-right" data-key="Right" class="key arrow">&rarr;</a>
+    <a id="key-arrow-down" data-key="Down" class="key arrow">&darr;</a>
+    <a id="key-arrow-left" data-key="Left" class="key arrow">&larr;</a>
+</div>
+</div>
+<h1 id="scan-opener">Scan</h1>
+<div class="menu" id="scaner">
+    <a class="big" href="/a/scan">SCAN</a>
+</div>
 <h1 id="clicker-opener">Clicker</h1>
 <div class="menu" id="clicker">
     <a class="big" href="/a/notify?move=prev">&uarr;</a>
@@ -94,28 +166,6 @@ a.big {
     <a class="big" href="/a/notify?move=right">&rarr;</a>
     <a class="big" href="/a/notify?move=home">Home</a>
     <a class="big" href="/a/notify?move=end">End</a>
-</div>
-<h1 id="keyboard-opener">Keyboard</h1>
-<div class="menu" id="keyboard">
-<div id="keys">
-<div id="keyboard-row-1" class="row">`~1!2@3#4$5%6^7&amp;8*9(0)-_=+</div>
-<div id="keyboard-row-2" class="row">qQwWeErRtTyYuUiIoOpP[{]}\|</div>
-<div id="keyboard-row-3" class="row">aAsSdDfFgGhHjJkKlL;:'"</div>
-<div id="keyboard-row-4" class="row">zZxXcCvVbBnNmM,&lt;.&gt;/?</div>
-</div>
-
-<div class="row" id="keys-control">
-    <a id="key-shift">shift</a>
-    <a id="key-ctrl">ctrl</a>
-    <a id="key-win">win</a>
-    <a data-key="space" class="key space" href="/a/type?key=space">&nbsp;</a>
-    <a data-key="Left" class="key arrow">&larr;</a>
-    <a data-key="Up" class="key arrow">&uarr;</a>
-    <a data-key="Down" class="key arrow">&darr;</a>
-    <a data-key="Right" class="key arrow">&rarr;</a>
-    <a data-key="Return" class="key">ret</a>
-    <a data-key="BackSpace" class="key">bs</a>
-</div>
 </div>
 <!--<a href="/a/scan">SCAN</a>-->
 <script type="text/javascript" charset="utf-8">
@@ -137,8 +187,9 @@ var makeMenu = function (opener, contents) {
     }, false);
 }
 
-makeMenu($('#clicker-opener'), $('#clicker'))
 makeMenu($('#keyboard-opener'), $('#keyboard'))
+makeMenu($('#clicker-opener'), $('#clicker'))
+makeMenu($('#scan-opener'), $('#scaner'))
 
 var specials = {
     '.': 'period',
@@ -183,11 +234,16 @@ var makeKbd = function (obj) {
     }
 }
 
+var updateKbdLine = function (text) {
+    $('#keyboard-line').innerText += text;
+    $('#keyboard-line').scrollLeft = $('#keyboard-line').scrollWidth
+}
+
 var enableAjaxKbd = function (obj) {
     var keys = $('.key');
     for (i in keys) {
         el = keys[i];
-        if (el.nodeName && el.nodeName.toLowerCase() == 'a') {
+        if (el.nodeName && el.nodeName.toLowerCase() == 'a' && !isNaN(parseInt(i))) {
             var a = el;
             a.addEventListener('click', function (a) {return function (e) {
                 var req = new XMLHttpRequest();
@@ -196,6 +252,7 @@ var enableAjaxKbd = function (obj) {
                 e.preventDefault();
                 keyModifier = '';
                 updateKbdModifier();
+                updateKbdLine(a.innerText)
             }}(a), false);
         }
     }
@@ -205,8 +262,6 @@ makeKbd($('#keyboard-row-1'));
 makeKbd($('#keyboard-row-2'));
 makeKbd($('#keyboard-row-3'));
 makeKbd($('#keyboard-row-4'));
-
-enableAjaxKbd();
 
 var keyModifier = '';
 var makeModKey = function (obj, name) {
@@ -218,6 +273,7 @@ var makeModKey = function (obj, name) {
         }
 
         updateKbdModifier();
+        updateKbdLine(obj.innerText + '+')
     });
 }
 
@@ -238,6 +294,12 @@ var updateKbdModifier = function () {
 }
 
 updateKbdModifier();
+
+enableAjaxKbd();
+
+// hacks
+$('#keyboard-row-3').appendChild($('#key-ret'))
+$('#keyboard-row-4').insertBefore($('#key-shift'), $('#keyboard-row-4').firstChild)
 </script>
 </body>
 </html>
